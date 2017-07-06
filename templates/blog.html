@@ -8,5 +8,6 @@
 <br>
     {% for p in posts %}
         {{ p.render() | safe }}
+        {{ p.getlikes(p.key().id()) }}  
     {% endfor %}
 {% endblock %}

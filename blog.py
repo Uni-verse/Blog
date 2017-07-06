@@ -182,8 +182,17 @@ class Blog_Post(db.Model):
     
     def by_id(cls, uid):
         return Blog_Post.get_by_id(uid)
-
     
+    def getlikes(cls, postid):
+        counter = 0
+        q = db.Query(Likes)
+        q.filter('post_id =', postid)
+        results = q.fetch(limit=50)
+        for row in results:
+            counter += 1
+            
+        return str(counter)
+        
 class User(db.Model):
     name = db.StringProperty(required = True)
     pw_hash = db.StringProperty(required = True)
@@ -219,7 +228,7 @@ class Likes(db.Model):
     
     @classmethod
     def by_name(cls, name):
-        u = Likes.all().filter('name =', name).get()
+        u = Likes.all().filter('post_id =', name).get()
         return u
     
     @classmethod
@@ -253,19 +262,19 @@ class ErrPage(BaseHandler):
             msg = self.request.get("msg")
             self.render("err_page.html", msg=msg, loggedin=loggedin, username=u)
         
-class GetLike(BaseHandler):
-    def post(self):
-        counter = 0
-        postid = data["postid"]
-        results = Likes.by_name(int(postid))
-        for x in results:
-            counter = counter + 1
-        
-        self.response.write(json.dumps({"message": message}))
-        output = counter
+#class GetLike(BaseHandler):
+#    def post(self):
+#        counter = 0
+#        postid = data["postid"]
+#        results = Likes.by_name(int(postid))
+#        for x in results:
+#            counter = counter + 1
+#        
+#        self.response.write(json.dumps({"message": message}))
+#        output = counter
 
         
-class AjaxHandler(Handler):
+class AjaxHandler(BaseHandler):
     def get(self):
         pass
 
@@ -273,15 +282,7 @@ class AjaxHandler(Handler):
         data = json.loads(self.request.body)
         postid = data["postid"]
 
-        if not re.match(r"^[a-zA-Z0-9_-]{3,20}$", username):
-            if len(username) < 3:
-                message = "Your name must be at least 3 characters long."
-            else:
-                message = "Allowed characters are \
-                           a-z, A-Z, 0-9, underscores \
-                           and hyphens."
-        else:
-            message = "Congrats!"
+        message = "success"
 
         self.response.write(json.dumps({"message": message}))
         
@@ -297,7 +298,7 @@ class Blog(BaseHandler):
 #        for c in count:
 #            self.counter += 1
         posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
-        self.render("blog.html", posts=posts, likes=likes, page_title="FMQ Blog", loggedin=loggedin)
+        self.render("blog.html", posts=posts, page_title="FMQ Blog", loggedin=loggedin)
         
     def post(self):
         if self.user:
@@ -412,7 +413,7 @@ app = webapp2.WSGIApplication([('/signup', Register),
                                ('/welcome', Welcome),
                                ('/blog/?', Blog),
                                ('/blog/del', DeletePost),
-                               ('/ajax/getlike', GetLike),
+                               ('/ajax/getlike', AjaxHandler),
                                ('/err', ErrPage),
                                ('/blog/newpost', NewPost),
                                ('/blog/([0-9]+)', PostPage)
