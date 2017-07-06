@@ -191,7 +191,7 @@ class Blog_Post(db.Model):
         for row in results:
             counter += 1
             
-        return str(counter)
+        return counter
         
 class User(db.Model):
     name = db.StringProperty(required = True)

@@ -13,40 +13,6 @@
         <br>
         <a id="edit" href="/blog/{{p.key().id()}}">Edit</a>{{error}}
         <form method='post' action='/blog'><input id='postid' type='hidden' name='postid' value='{{p.key().id()}}'><input type='hidden' name='author' value='{{p.author}}'><input type='hidden' name='addlike' value='like'>
-        <input type="submit" value="like"></form><span id="likes">{{ p.getlikes(p.key().id()) }}</span>
-        <br>
-        <br>
+        <input type="submit" value="like"></form><span id="likes">{{ p.getlikes('4872210900582400') }}</span>
     </div>
-    <script>
-        (function(){
-//            function ajaxScript() {
-//                var input = $("#postid").val();
-//                $.ajax({
-//                    type: "POST",
-//                    url: "/ajax/getlike",
-//                    data: JSON.stringify({
-//                        "name": input
-//                    }),
-//                    dataType: "json"
-//                })
-//                .done(function(jsonResponse) {
-//                    $("#likes").html(jsonResponse.message);
-//                });
-//                $.ajax({
-//                    type: 'POST',
-//                    url: "/ajax/getlike",
-//                    data: {postid: input}, //passing some input here
-//                    dataType: "text",
-//                    success: function(response){
-//                        output = response;
-//                        console.log(output);
-//                        $('#likes').html(output);
-//                    }
-//                }).done(function(data){
-//                    console.log(data);
-//                    alert(data);
-//                });
-        }  
-        })();
-    </script>
 </div>  
