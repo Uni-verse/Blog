@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{{page_title}}</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!--import JQuery-->
+        <script
+        src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+          crossorigin="anonymous"></script>
+        <!--import Bootstrap-->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link href="https://fonts.googleapis.com/css?family=Great+Vibes|Lobster|Rock+Salt|Shadows+Into+Light+Two" rel="stylesheet">
+        <style>
+            .error {color: red}
+        </style>
+    </head>
+    <body>
+        <div id="wrapper" class="container">
+                <nav class="navbar navbar-default">
+                    <div class="nav navbar-nav" style="float: left;font-size: 2em;margin-left: 2em;"><span style="font-family: 'Great Vibes', 'serif';">F</span><span style="font-family: 'RockSalt', 'serif';">M</span><span style="font-family: 'Lobster', 'serif';">Q</span> blog</div>
+                    <ul id="navbar" style="float: right;" class="nav navbar-nav">
+                        <li><a href="/blog">Home</a></li>
+                        <li><a href='/blog/newpost'>Create Post</a></li>
+                        <li><a href="/signup">Register</a></li>
+                        {% if loggedin %}
+                        <li><a href="/logout">Sign Out</a></li>
+                        {% else %}
+                        <li><a href="/login">Sign In</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                <script>console.log(window.location.pathname);</script>
+        {% block content %}
+        {% endblock %}
+        </div>
+        
+               
+    </body>
+</html>

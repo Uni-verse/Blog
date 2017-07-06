@@ -1,0 +1,52 @@
+<div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-12">
+        <h4 class="col-lg-6 col-md-4 col-sm-6 col-xs-12">{{p.subject}}</h4>
+        <span style="float: right;" class="col-lg-2 col-md-4 col-sm-4 col-xs-12">-{{p.created.strftime("%b %d, %Y")}}</span>
+            <input id="author" type="hidden" data-author="{{p.author}}">
+            <input id="id" type="hidden" data-id="{{p.key().id()}}">
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-12">
+        <hr>
+        <p>{{p._render_text | safe}}</p>
+        <br>
+        <a id="edit" href="/blog/{{p.key().id()}}">Edit</a>{{error}}
+        <form method='post' action='/blog'><input id='postid' type='hidden' name='postid' value='{{p.key().id()}}'><input type='hidden' name='author' value='{{p.author}}'><input type='hidden' name='addlike' value='like'>
+        <input type="submit" value="like"></form><span id="likes"></span>
+        <br>
+        <br>
+    </div>
+    <script>
+        (function(){
+            function ajaxScript() {
+                var input = $("#postid").val();
+//                $.ajax({
+//                    type: "POST",
+//                    url: "/ajax/getlike",
+//                    data: JSON.stringify({
+//                        "name": input
+//                    }),
+//                    dataType: "json"
+//                })
+//                .done(function(jsonResponse) {
+//                    $("#likes").html(jsonResponse.message);
+//                });
+                $.ajax({
+                    type: 'POST',
+                    url: "/ajax/getlike",
+                    data: {postid: input}, //passing some input here
+                    dataType: "text",
+                    success: function(response){
+                        output = response;
+                        console.log(output);
+                        $('#likes').html(output);
+                    }
+                }).done(function(data){
+                    console.log(data);
+                    alert(data);
+                });
+        }  
+        })();
+    </script>
+</div>  

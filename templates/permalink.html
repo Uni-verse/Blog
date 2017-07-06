@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {{post.render() | safe}}
+    {% if loggedin and username %}
+    <script>
+        (function(){
+            $("#edit").remove();
+            var did = $('#id').data('id');
+            console.log(did);
+            $('#wrapper').append("<form method='post' action='/blog/"+did+"')'><input type='hidden' name='erase' value='"+did+"'><a><input type='submit' style='background: none;border: none;margin:0;padding:0;color:red;' value='Delete'></a></form>");
+        })();
+    </script>
+<!--
+        <script>
+            $("#edit").remove();
+            $('#wrapper').append("<span style='color: red;'>You must be the owner of this post to alter it.</span>");
+        </script>
+-->
+    {% endif %}
+    <a id="btb" href="/blog">Back to blog</a><p id="error" style="color: red;">{{msg}}</p>
+{% endblock %}

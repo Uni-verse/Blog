@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div style="min-width: 300px;"class="well col-sm-4 col-sm-offset-4 col-xs-6 col-xs-offset-3">
+            <h2>Register</h2>
+            <br>
+            <form method="post">
+                <label>Username:</label>
+                <p><input style="width: 80%;" type="text" name="username" value="{{username}}"></p><p class="error">{{error_username}}</p>
+                <label>Password:</label>
+                <p><input style="width: 80%;" type="password" name="password" value=""></p><p class="error">{{error_password}}</p>
+                <label>Verify Password:</label>
+                <p><input style="width: 80%;" type="password" name="verify" value=""></p><p class="error">{{error_verify}}</p>
+                <label>Email (Optional): </label>
+                <p><input style="width: 80%;" type="text" name="email" value="{{email}}"></p><p class="error">{{error_email}}</p>
+                <input type="submit" class="btn btn-primary" value="Submit">
+            </form>
+            <span style="float: right;">Already Registered?<a href='/login'> Sign in</a></span>
+        </div>
+    </div>
+{% endblock %}
