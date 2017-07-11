@@ -289,6 +289,8 @@ class AjaxHandler(BaseHandler):
         
 class Blog(BaseHandler):
     def get(self):
+        posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
+        loggedin = False
         if self.user:
             loggedin = True
 #        count = db.GqlQuery("Select user FROM Likes WHERE post_id="+str(postid)+"")
@@ -297,8 +299,9 @@ class Blog(BaseHandler):
 #            self.counter = self.counter + 1
 #        for c in count:
 #            self.counter += 1
-        posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
-        self.render("blog.html", posts=posts, page_title="FMQ Blog", loggedin=loggedin)
+            self.render("blog.html", posts=posts, page_title="FMQ Blog", loggedin=loggedin)
+        else:
+            self.render("blog.html", posts=posts, page_title="FMQ Blog")
         
     def post(self):
         if self.user:
