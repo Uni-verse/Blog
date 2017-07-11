@@ -180,6 +180,10 @@ class Blog_Post(db.Model):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("blog_post.html", p=self)
     
+    def render_edit(self):
+        self._render_text = self.content.replace('\n', '<br>')
+        return render_str("edit_post.html", p=self)
+    
     def by_id(cls, uid):
         return Blog_Post.get_by_id(uid)
     
@@ -364,12 +368,14 @@ class PostPage(BaseHandler):
     def post(self, request):
         if self.user:
             loggedin = True
-            if self.request.get('edit'):
-                self.redirect('/blog/editpost', idToedit=self.request.get('edit'))
+#            if self.request.get('edit'):
+#                idToedit=self.request.get('edit')
+#                p = Blog_Post.get_by_id(int(idToedit))
+#                self.redirect('/blog/editpost')
             if self.request.get('erase'):
                 idTodel = self.request.get('erase')
                 p = Blog_Post.get_by_id(int(idTodel))
-    #            key = db.Key.from_path('Blog_Post', int(idTodel))
+    #            key = db.Key.from_path('Blog_Post',          int(idTodel))
     #            post = db.get(key)
                 if p.author == self.user.name:
                     p.delete()
@@ -382,15 +388,28 @@ class PostPage(BaseHandler):
 
 class EditPost(BaseHandler):
     def get(self):
-        pass
+        self.redirect('/blog')
     
     def post(self):
         if self.user:
             loggedin = True
-        if self.request.get("idToedit"):
-            p = Blog_Post.get_by_id(int(idTodedit))
-        
-        
+        if self.request.get("edit"):
+            idToedit = self.request.get("edit")
+            subject = self.request.get("subject")
+            content = self.request.get("content")
+            author = self.request.get("author")
+
+            if subject and content:
+                p = Blog_Post.get_by_id(int(idToedit))
+                p.subject = subject
+                p.content = content
+                p.put()
+                msg = "Your post has been edited."
+                self.redirect('/err?msg=%s' % msg)
+            else:
+                error = "Please fill both fields."
+                self.render("permalink.html", subject=subject, content=content, page_title="Edit Post", error=error, loggedin=loggedin, username=self.user.name)
+
 class NewPost(BaseHandler): 
     def get(self):
         if self.user:

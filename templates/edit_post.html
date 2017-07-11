@@ -1,26 +1,24 @@
-{% extends "base.html" %}
-
-{% block content %}
-<h1>Edit Post</h1>
-        <br>
-            <form method="post" action="/blog/newpost">
-                <label>Title</label>
+<div class="row">
+    <div style="min-width: 300px;"class="well col-sm-4 col-sm-offset-4 col-xs-6 col-xs-offset-3">
+        <h1>Edit Post</h1>
                 <br>
-                <input type="text" name="subject" value="{{subject}}" style="width: 100%;height: 2em;">
+                    <form method="post" action="/blog/editpost">
+                        <label>Title</label>
+                        <br>
+                        <input type="text" name="subject" value="{{p.subject}}" style="width: 100%;height: 2em;">
+                        <br>
+                        <br>
+                        <div><label>Body</label>
+                        <br>
+                        <textarea name="content" style="width: 100%;height: 10em;">{{p._render_text | safe}}</textarea>
+                        <br>
+                        </div>
+                        <input type="submit" class="btn btn-primary" value="Apply Changes">
+                        <span style="color: red;">{{error}}</span>
+                        <input id='postid' type='hidden' name='postid' value='{{p.key().id()}}'>
+                         <input type="hidden" name="author" value="{{username}}">
+                        <input type="hidden" name="edit" value="{{p.key().id()}}">
+                    </form>
                 <br>
-                <br>
-                <div><label>Body</label>
-                <br>
-                <textarea name="content" style="width: 100%;height: 10em;">{{content}}</textarea>
-                <br>
-                </div>
-                <input type="submit" class="btn btn-primary">
-                <span style="color: red;">{{error}}</span>
-                <input type="hidden" name="author" value="{{username}}">
-            </form>
-{% for p in posts %}
-    {{ p.render() | safe }}
-    <br><br>
-{% endfor %}
-
-{% endblock %}
+    </div>
+</div>
