@@ -364,18 +364,32 @@ class PostPage(BaseHandler):
     def post(self, request):
         if self.user:
             loggedin = True
-            idTodel = self.request.get('erase')
-            p = Blog_Post.get_by_id(int(idTodel))
-#            key = db.Key.from_path('Blog_Post', int(idTodel))
-#            post = db.get(key)
-            if p.author == self.user.name:
-                p.delete()
-                msg = "Post successfully deleted."
-                self.redirect('/err?msg=%s' % str(msg))
-            else:
-                msg = "You must be the author to edit."
-                self.redirect('/err?msg=%s' % str(msg))
+            if self.request.get('edit'):
+                self.redirect('/blog/editpost', idToedit=self.request.get('edit'))
+            if self.request.get('erase'):
+                idTodel = self.request.get('erase')
+                p = Blog_Post.get_by_id(int(idTodel))
+    #            key = db.Key.from_path('Blog_Post', int(idTodel))
+    #            post = db.get(key)
+                if p.author == self.user.name:
+                    p.delete()
+                    msg = "Post successfully deleted."
+                    self.redirect('/err?msg=%s' % str(msg))
+                else:
+                    msg = "You must be the author to edit."
+                    self.redirect('/err?msg=%s' % str(msg))
                               
+
+class EditPost(BaseHandler):
+    def get(self):
+        pass
+    
+    def post(self):
+        if self.user:
+            loggedin = True
+        if self.request.get("idToedit"):
+            p = Blog_Post.get_by_id(int(idTodedit))
+        
         
 class NewPost(BaseHandler): 
     def get(self):
@@ -415,6 +429,7 @@ app = webapp2.WSGIApplication([('/signup', Register),
                                ('/logout', Logout),
                                ('/welcome', Welcome),
                                ('/blog/?', Blog),
+                               ('/blog/editpost', EditPost),
                                ('/blog/del', DeletePost),
                                ('/ajax/getlike', AjaxHandler),
                                ('/err', ErrPage),
