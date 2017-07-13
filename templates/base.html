@@ -43,5 +43,14 @@
         })
     })();    
     </script>
+        <script>
+    (function(){
+        $(".user-icon").each(function(){
+            var hue = 'rgb(' + (Math.floor(Math.random() * 255)) + ',' + (Math.floor(Math.random() * 255)) + ',' + (Math.floor(Math.random() * 255)) + ')';
+            $(this).css('background', hue);    
+        });
+            
+    })();
+</script>
     </body>
 </html>
