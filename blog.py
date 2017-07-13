@@ -279,24 +279,30 @@ class Blog(BaseHandler):
             self.render("blog.html", posts=posts, page_title="FMQ Blog")
         
     def post(self):
+        posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
+        loggedin = False
         if self.user:
             loggedin = True
-            
-        if self.request.get('addlike'):
-            postid = self.request.get("addlike")
-            bp = Blog_Post.get_by_id(int(postid))
-            if bp.author != self.user.name:
-                Blog_Post.addlike(self.user.name, postid)
-                posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
-                time.sleep(0.2)
-                self.redirect('/blog')
-#               self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
-            else: 
+            if self.request.get('addlike'):
+                postid = self.request.get("addlike")
+                bp = Blog_Post.get_by_id(int(postid))
+                
+                if bp.author is not self.user.name:
+                    Blog_Post.addlike(self.user.name, postid)
+                    posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
+                    time.sleep(0.2)
+                    self.redirect('/blog')
+    #               self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
+                else: 
+                    posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
+                    self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
+            else:
                 posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
                 self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
         else:
-            posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
-            self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
+            self.redirect('/blog')
+            
+        
 
         
 class DeletePost(BaseHandler):
