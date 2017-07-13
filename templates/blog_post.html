@@ -7,12 +7,16 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-12">
-        <hr>
-        <p>{{p._render_text | safe}}</p>
+    <div id="post-body" class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-12">
+        <hr style="border:1px solid gray;">
+        <p style="padding-left: 3em;padding-right: 3em;">{{p._render_text | safe}}</p>
         <br>
-        <a id="edit" href="/blog/{{p.key().id()}}">Edit</a>{{error}}
-        <form method='post' action='/blog'><input id='postid' type='hidden' name='postid' value='{{p.key().id()}}'><input type='hidden' name='author' value='{{p.author}}'><input type='hidden' name='addlike' value='like'>
-        <input type="submit" value="like"></form><span id="likes">{{ p.getlikes('4872210900582400') }}</span>
+        <div style="float: right;">
+            <a id="edit" href="/blog/{{p.key().id()}}">EDIT</a>{{error}}
+            <form method='post' action='/blog'><input id='postid' type='hidden' name='postid' value='{{p.key().id()}}'><input type='hidden' name='author' value='{{p.author}}'><input type='hidden' name='addlike' value='{{p.key().id()}}'>
+            <input class="likes" style="position:relative;background:none;border:none;padding:0;" type="submit" value="LIKES">
+            <span style="position:relative;color:blue;" id="likes"> - {{ p.likes }}</span>
+            </form>
+        </div>
     </div>
 </div>  

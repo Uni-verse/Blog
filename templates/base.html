@@ -12,7 +12,8 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <link href="https://fonts.googleapis.com/css?family=Great+Vibes|Lobster|Rock+Salt|Shadows+Into+Light+Two" rel="stylesheet">
         <style>
-            .error {color: red}
+            .error {color: red} 
+            }
         </style>
     </head>
     <body>
@@ -34,7 +35,13 @@
         {% block content %}
         {% endblock %}
         </div>
-        
-               
+    <script>
+    (function(){
+        $('.likes').click(function(){
+            $(this).animate({top: '-10px', fontSize: '1.5em', fontWeight: '400'}, "fast");
+            $(this).animate({top: '10px', fontSize: '1.0em', fontWeight: '100'}, "fast");
+        })
+    })();    
+    </script>
     </body>
 </html>

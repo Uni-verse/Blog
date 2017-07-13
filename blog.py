@@ -1,5 +1,6 @@
 import os
 import re
+import time
 import hmac
 import hashlib
 import random
@@ -164,12 +165,30 @@ class Logout(BaseHandler):
         self.logout()
         self.redirect('/login')
         
-                      
+        
+class Likes(db.Model):
+    user = db.StringProperty(required = True)
+    post_id = db.StringProperty(required = True)
+    
+    @classmethod
+    def check(cls, user, postid):
+        rows = 0
+        q = db.GqlQuery("Select * FROM Likes WHERE post_id='"+postid+"' AND user='"+user+"'")
+        for r in q:
+            rows += 1
+            
+        if rows == 0:
+            return True
+        else:
+            return False
+    
+    
 class Blog_Post(db.Model):
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
     author = db.StringProperty(required = True)
+    likes = db.IntegerProperty()
     
     @classmethod
     def by_author(cls, author):
@@ -187,15 +206,15 @@ class Blog_Post(db.Model):
     def by_id(cls, uid):
         return Blog_Post.get_by_id(uid)
     
-    def getlikes(cls, postid):
-        counter = 0
-        q = db.Query(Likes)
-        q.filter('post_id =', postid)
-        results = q.fetch(limit=50)
-        for row in results:
-            counter += 1
-            
-        return counter
+    @classmethod
+    def addlike(cls, user, postid):
+        if Likes.check(user, postid):
+            p = Blog_Post.get_by_id(int(postid))
+            p.likes += 1
+            p.put()
+            nl = Likes(user = user, post_id = postid)
+            nl.put()
+        
         
 class User(db.Model):
     name = db.StringProperty(required = True)
@@ -226,24 +245,6 @@ class User(db.Model):
             return u
     
     
-class Likes(db.Model):
-    user = db.StringProperty(required = True)
-    post_id = db.TextProperty(required = True)
-    
-    @classmethod
-    def by_name(cls, name):
-        u = Likes.all().filter('post_id =', name).get()
-        return u
-    
-    @classmethod
-    def add(cls, user, postid):
-        return Likes(user = user, post_id = postid)
-    
-    @classmethod
-    def by_id(cls, uid):
-        return Likes.get_by_id(uid)
-    
-    
 class Welcome(BaseHandler):
     def get(self):
         if self.user:
@@ -266,30 +267,6 @@ class ErrPage(BaseHandler):
             msg = self.request.get("msg")
             self.render("err_page.html", msg=msg, loggedin=loggedin, username=u)
         
-#class GetLike(BaseHandler):
-#    def post(self):
-#        counter = 0
-#        postid = data["postid"]
-#        results = Likes.by_name(int(postid))
-#        for x in results:
-#            counter = counter + 1
-#        
-#        self.response.write(json.dumps({"message": message}))
-#        output = counter
-
-        
-class AjaxHandler(BaseHandler):
-    def get(self):
-        pass
-
-    def post(self):
-        data = json.loads(self.request.body)
-        postid = data["postid"]
-
-        message = "success"
-
-        self.response.write(json.dumps({"message": message}))
-        
         
 class Blog(BaseHandler):
     def get(self):
@@ -297,12 +274,6 @@ class Blog(BaseHandler):
         loggedin = False
         if self.user:
             loggedin = True
-#        count = db.GqlQuery("Select user FROM Likes WHERE post_id="+str(postid)+"")
-#        results = self.count.fetch(limit=1000)
-#        for x in results:
-#            self.counter = self.counter + 1
-#        for c in count:
-#            self.counter += 1
             self.render("blog.html", posts=posts, page_title="FMQ Blog", loggedin=loggedin)
         else:
             self.render("blog.html", posts=posts, page_title="FMQ Blog")
@@ -311,28 +282,22 @@ class Blog(BaseHandler):
         if self.user:
             loggedin = True
             
-        if self.request.get('addlike') and self.request.get('postid') and self.request.get('author'):
-            author = self.request.get("author")
-            postid = self.request.get("postid")
+        if self.request.get('addlike'):
+            postid = self.request.get("addlike")
             bp = Blog_Post.get_by_id(int(postid))
-            if bp.author is not self.user.name:
-                q = Likes.add(author, postid)
-                q.put()
+            if bp.author != self.user.name:
+                Blog_Post.addlike(self.user.name, postid)
                 posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
-                self.redirect('/err?liked=%s' % bp.author)
-#                self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
-        else: 
-            self.redirect('/blog')
+                time.sleep(0.2)
+                self.redirect('/blog')
+#               self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
+            else: 
+                posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
+                self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
+        else:
+            posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
+            self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
 
-
-#    def post(self):
-#        if self.request.get('id') and self.request.get('author') and self.request.get('addlike'):
-#            
-        
-#class ErrPage(BaseHandler):
-#    def get(self):
-#        msg = self.request.get("msg")
-#        self.render("err_page.html", msg=msg)
         
 class DeletePost(BaseHandler):
     def get(self):
@@ -350,21 +315,25 @@ class PostPage(BaseHandler):
     def get(self, post_id):
         if self.user:
             loggedin = True
-            u = Blog_Post.get_by_id(int(post_id))
-            key = db.Key.from_path('Blog_Post', int(post_id))
-            post = db.get(key)
-            if not post:
-                self.error(404)
-                return
-            elif not u:
-                error = "You must be owner of the this post to edit."
-                u = ""
-                self.render("permalink.html", post=post, error=error, loggedin=loggedin)
+            p = Blog_Post.get_by_id(int(post_id))
+            if p.author == self.user.name:
+                key = db.Key.from_path('Blog_Post', int(post_id))
+                post = db.get(key)
+                if not post:
+                    self.error(404)
+                    return
+                elif not p:
+                    error = "You must be owner of the this post to edit."
+                    p = ""
+                    self.render("permalink.html", post=post, error=error, loggedin=loggedin, page_title="Edit Post")
+                else:
+                    self.render("permalink.html", post=post, username=p, loggedin=loggedin, page_title="Edit Post")
             else:
-                self.render("permalink.html", post=post, username=u, loggedin=loggedin)
+                msg = "You must be the author to edit."
+                self.redirect('/err?msg=%s' % str(msg)) 
         else: 
             self.redirect('/login')
-            
+                
     def post(self, request):
         if self.user:
             loggedin = True
@@ -428,8 +397,10 @@ class NewPost(BaseHandler):
         author = self.request.get("author")
         
         if subject and content:
-            bp = Blog_Post(subject = subject, content = content, author = author)
+            bp = Blog_Post(subject = subject, content = content, author = author, likes = 0)
             bp.put()
+            time.sleep(0.1)
+            self.redirect('/blog')
             self.redirect('/err?np=%s' % str(bp.key().id()))
         else:
             error = "Please fill both fields."
@@ -450,7 +421,6 @@ app = webapp2.WSGIApplication([('/signup', Register),
                                ('/blog/?', Blog),
                                ('/blog/editpost', EditPost),
                                ('/blog/del', DeletePost),
-                               ('/ajax/getlike', AjaxHandler),
                                ('/err', ErrPage),
                                ('/blog/newpost', NewPost),
                                ('/blog/([0-9]+)', PostPage)
