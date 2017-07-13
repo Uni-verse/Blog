@@ -2,7 +2,7 @@
     <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-12">
         <div class="user-icon" style="float:left;height:3em;width:3em;border-radius:1.5em;font-size:1em;color:white;" onload="addbg(event);"><p style="position:relative;font-size:3em;top:-0.25em;left:0.25em;">
             {% if p.author %}
-            {% set x = p.author.split(",") %}
+            {% set x = p.author.lower().split(",") %}
             {{ x[0][:1] }}
             {% endif %}
             </p></div>
