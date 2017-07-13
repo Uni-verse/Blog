@@ -19,8 +19,7 @@ Install Google App Engine SDK
 Install gcloud component and python for app engine.
 
 When developing locally, you can use dev_appserver.py to run a copy of your app on your own computer, and access it at http://localhost:8080/.
-
-Required Libraries
+Dependencies
 Python Jinja2, Webapp2
 Boostrap CDN
 JQuery CDN

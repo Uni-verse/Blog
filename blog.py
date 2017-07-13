@@ -45,6 +45,7 @@ def valid_pw(name, password, h):
 
 def users_key(group = 'default'):
     return db.Key.from_path('users', group)
+
     
 class BaseHandler(webapp2.RequestHandler):
     def render(self, template, **kw):
@@ -67,7 +68,8 @@ class BaseHandler(webapp2.RequestHandler):
         self.set_secure_cookie('user_id', str(user.key().id()))
 
     def logout(self):
-        self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
+        self.response.headers.add_header('Set-Cookie',
+                                         'user_id=; Path=/')
 
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
@@ -87,7 +89,7 @@ EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
     return not email or EMAIL_RE.match(email)
 
-
+#Signup Handler
 class Signup(BaseHandler):
     def get(self):
         if self.user:   
@@ -128,21 +130,24 @@ class Signup(BaseHandler):
     def done(self, *a, **kw):
         raise NotImplementedError
         
-        
+#Register handler extends Signup       
 class Register(Signup):
+    #Overwritten Func
     def done(self):
         u = User.by_name(self.username)
         if u:
             msg = 'That user already exists.'
             self.render('signup-form.html', error_username = msg)
         else: 
-            u = User.register(self.username, self.password, self.email)
+            u = User.register(self.username,
+                              self.password, self.email)
             u.put()
             
             self.login(u)
             self.redirect('/welcome')
-            
-
+         
+        
+#Login Handler
 class Login(BaseHandler):
     def get(self):
         self.render('login-form.html', error='')
@@ -159,30 +164,31 @@ class Login(BaseHandler):
             msg = 'Invalid login'
             self.render('login-form.html', error = msg)
 
-
+#Logout Handler
 class Logout(BaseHandler):
     def get(self):
         self.logout()
         self.redirect('/login')
         
-        
+#Likes DB  
 class Likes(db.Model):
     user = db.StringProperty(required = True)
     post_id = db.StringProperty(required = True)
     
     @classmethod
     def check(cls, user, postid):
+        #Check if specific user is tagged with this post_id
         rows = 0
         q = db.GqlQuery("Select * FROM Likes WHERE post_id='"+postid+"' AND user='"+user+"'")
+        #get results and check amount of rows
         for r in q:
             rows += 1
-            
         if rows == 0:
             return True
         else:
             return False
     
-    
+Blog_Post DB   
 class Blog_Post(db.Model):
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
@@ -199,6 +205,7 @@ class Blog_Post(db.Model):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("blog_post.html", p=self)
     
+    #Render edit_post.html
     def render_edit(self):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("edit_post.html", p=self)
@@ -206,8 +213,8 @@ class Blog_Post(db.Model):
     def by_id(cls, uid):
         return Blog_Post.get_by_id(uid)
     
-    @classmethod
     def addlike(cls, user, postid):
+        #Check Likes database if user is tagged with post_id
         if Likes.check(user, postid):
             p = Blog_Post.get_by_id(int(postid))
             p.likes += 1
@@ -215,7 +222,7 @@ class Blog_Post(db.Model):
             nl = Likes(user = user, post_id = postid)
             nl.put()
         
-        
+#User DB Class       
 class User(db.Model):
     name = db.StringProperty(required = True)
     pw_hash = db.StringProperty(required = True)
@@ -249,11 +256,13 @@ class Welcome(BaseHandler):
     def get(self):
         if self.user:
             loggedin = True
-            self.render('welcome.html', username = self.user.name, loggedin=loggedin)
+            self.render('welcome.html',
+                        username = self.user.name,
+                        loggedin=loggedin)
         else:
             self.redirect('/login')
             
-            
+#Class used for POST->REDIRECT           
 class ErrPage(BaseHandler):
     def get(self):
         if self.user:
@@ -265,63 +274,72 @@ class ErrPage(BaseHandler):
             self.redirect('/blog')
         elif self.request.get('msg'):
             msg = self.request.get("msg")
-            self.render("err_page.html", msg=msg, loggedin=loggedin, username=u)
+            self.render("err_page.html", msg=msg,
+                        loggedin=loggedin, username=u)
         
-        
+#Handler for /blog page   
 class Blog(BaseHandler):
     def get(self):
         posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
         loggedin = False
         if self.user:
             loggedin = True
-            self.render("blog.html", posts=posts, page_title="FMQ Blog", loggedin=loggedin)
+            self.render("blog.html", posts=posts,
+                        page_title="FMQ Blog",
+                        loggedin=loggedin)
         else:
-            self.render("blog.html", posts=posts, page_title="FMQ Blog")
+            self.render("blog.html", posts=posts,
+                        page_title="FMQ Blog")
         
     def post(self):
         posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
         loggedin = False
         if self.user:
             loggedin = True
+            # if addlike form is submitted...
             if self.request.get('addlike'):
                 postid = self.request.get("addlike")
                 bp = Blog_Post.get_by_id(int(postid))
-                
+                # if author of post is not current user then addlike
                 if bp.author is not self.user.name:
                     Blog_Post.addlike(self.user.name, postid)
                     posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
-                    time.sleep(0.2)
+                    time.sleep(0.1)
                     self.redirect('/blog')
     #               self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
                 else: 
                     posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
-                    self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
+                    self.render("blog.html", posts = posts,
+                                page_title = "FMQ Blog",
+                                loggedin = loggedin)
             else:
                 posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
-                self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
+                self.render("blog.html", posts = posts,
+                            page_title = "FMQ Blog",
+                            loggedin = loggedin)
         else:
             self.redirect('/blog')
             
-        
-
-        
+            
 class DeletePost(BaseHandler):
     def get(self):
         self.redirect("/blog")
         
     def post(self):
+        # if delete form is submitted with POST
         id_to_del = self.request.get("delete")
         q = db.GqlQuery("Select * FROM Blog_Post WHERE id="+id_to_del+" LIMIT 1")
         db.delete(q)
         msg = "You have deleted the post."
         self.render("delete_post.html", msg=msg)
         
-        
+# Permalink.html Handler /blog/[0-9]        
 class PostPage(BaseHandler):
     def get(self, post_id):
         if self.user:
             loggedin = True
             p = Blog_Post.get_by_id(int(post_id))
+            # if post author is current user, take to edit page
             if p.author == self.user.name:
                 key = db.Key.from_path('Blog_Post', int(post_id))
                 post = db.get(key)
@@ -331,9 +349,13 @@ class PostPage(BaseHandler):
                 elif not p:
                     error = "You must be owner of the this post to edit."
                     p = ""
-                    self.render("permalink.html", post=post, error=error, loggedin=loggedin, page_title="Edit Post")
+                    self.render("permalink.html", post=post,
+                                error=error, loggedin=loggedin,
+                                page_title="Edit Post")
                 else:
-                    self.render("permalink.html", post=post, username=p, loggedin=loggedin, page_title="Edit Post")
+                    self.render("permalink.html", post=post,
+                                username=p, loggedin=loggedin,
+                                page_title="Edit Post")
             else:
                 msg = "You must be the author to edit."
                 self.redirect('/err?msg=%s' % str(msg)) 
@@ -343,15 +365,10 @@ class PostPage(BaseHandler):
     def post(self, request):
         if self.user:
             loggedin = True
-#            if self.request.get('edit'):
-#                idToedit=self.request.get('edit')
-#                p = Blog_Post.get_by_id(int(idToedit))
-#                self.redirect('/blog/editpost')
+            # if Delete button was press on post edit page
             if self.request.get('erase'):
                 idTodel = self.request.get('erase')
                 p = Blog_Post.get_by_id(int(idTodel))
-    #            key = db.Key.from_path('Blog_Post',          int(idTodel))
-    #            post = db.get(key)
                 if p.author == self.user.name:
                     p.delete()
                     msg = "Post successfully deleted."
@@ -360,7 +377,7 @@ class PostPage(BaseHandler):
                     msg = "You must be the author to edit."
                     self.redirect('/err?msg=%s' % str(msg))
                               
-
+# /blog/editpost Handler
 class EditPost(BaseHandler):
     def get(self):
         self.redirect('/blog')
@@ -383,13 +400,20 @@ class EditPost(BaseHandler):
                 self.redirect('/err?msg=%s' % msg)
             else:
                 error = "Please fill both fields."
-                self.render("permalink.html", subject=subject, content=content, page_title="Edit Post", error=error, loggedin=loggedin, username=self.user.name)
-
+                self.render("permalink.html", subject=subject,
+                            content=content, page_title="Edit Post",
+                            error=error, loggedin=loggedin,
+                            username=self.user.name)
+                
+#/blog/newpost handler
 class NewPost(BaseHandler): 
     def get(self):
         if self.user:
             loggedin = True
-            self.render("new_post.html", page_title="New Post", loggedin=loggedin, username=self.user.name)
+            self.render("new_post.html",
+                        page_title="New Post",
+                        loggedin=loggedin,
+                        username=self.user.name)
         else:
             self.redirect('/login')
         
@@ -401,24 +425,21 @@ class NewPost(BaseHandler):
         subject = self.request.get("subject")
         content = self.request.get("content")
         author = self.request.get("author")
-        
+        # if both fields are populated, continue
         if subject and content:
-            bp = Blog_Post(subject = subject, content = content, author = author, likes = 0)
+            bp = Blog_Post(subject = subject, content = content,
+                           author = author, likes = 0)
             bp.put()
             time.sleep(0.1)
             self.redirect('/blog')
             self.redirect('/err?np=%s' % str(bp.key().id()))
         else:
             error = "Please fill both fields."
-            self.render("new_post.html", subject=subject, content=content, page_title="New Post", error=error, loggedin=loggedin, username=self.user.name)
+            self.render("new_post.html", subject=subject,
+                        content=content, page_title="New Post",
+                        error=error, loggedin=loggedin,
+                        username=self.user.name)
         
-#class Welcome(BaseHandler):
-#    def get(self):
-#        username = self.request.get('username')
-#        if valid_username(username):
-#            self.render('welcome.html', username = username)
-#        else:
-#            self.redirect('/signup')
             
 app = webapp2.WSGIApplication([('/signup', Register),
                                ('/login', Login),

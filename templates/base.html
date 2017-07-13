@@ -19,7 +19,11 @@
     <body>
         <div id="wrapper" class="container">
                 <nav class="navbar navbar-default">
-                    <div class="nav navbar-nav" style="float: left;font-size: 2em;margin-left: 2em;"><span style="font-family: 'Great Vibes', 'serif';">F</span><span style="font-family: 'RockSalt', 'serif';">M</span><span style="font-family: 'Lobster', 'serif';">Q</span> blog</div>
+                    <div class="nav navbar-nav" style="float: left;font-size: 2em;margin-left: 2em;">
+                        <span style="font-family: 'Great Vibes', 'serif';">F</span>
+                        <span style="font-family: 'RockSalt', 'serif';">M</span>
+                        <span style="font-family: 'Lobster', 'serif';">Q</span> blog
+                    </div>
                     <ul id="navbar" style="float: right;" class="nav navbar-nav">
                         <li><a href="/blog">Home</a></li>
                         <li><a href='/blog/newpost'>Create Post</a></li>
@@ -38,12 +42,10 @@
     <script>
     (function(){
         $('.likes').click(function(){
-            $(this).animate({top: '-10px', fontSize: '1.5em', fontWeight: '400'}, "fast");
+            $(this).animate({top: '-10px', fontSize: '1.25em', fontWeight: '400'}, "fast");
             $(this).animate({top: '10px', fontSize: '1.0em', fontWeight: '100'}, "fast");
         })
     })();    
-    </script>
-        <script>
     (function(){
         $(".user-icon").each(function(){
             var hue = 'rgb(' + (Math.floor(Math.random() * 255)) + ',' + (Math.floor(Math.random() * 255)) + ',' + (Math.floor(Math.random() * 255)) + ')';
@@ -51,6 +53,6 @@
         });
             
     })();
-</script>
+    </script>
     </body>
 </html>
