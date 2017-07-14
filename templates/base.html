@@ -26,11 +26,11 @@
                     </div>
                     <ul id="navbar" style="float: right;" class="nav navbar-nav">
                         <li><a href="/blog">Home</a></li>
-                        <li><a href='/blog/newpost'>Create Post</a></li>
-                        <li><a href="/signup">Register</a></li>
                         {% if loggedin %}
+                        <li><a href='/blog/newpost'>Create Post</a></li>
                         <li><a href="/logout">Sign Out</a></li>
                         {% else %}
+                        <li><a href="/signup">Register</a></li>
                         <li><a href="/login">Sign In</a></li>
                         {% endif %}
                     </ul>

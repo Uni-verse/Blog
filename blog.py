@@ -164,6 +164,7 @@ class Login(BaseHandler):
             msg = 'Invalid login'
             self.render('login-form.html', error = msg)
 
+            
 #Logout Handler
 class Logout(BaseHandler):
     def get(self):
@@ -179,7 +180,8 @@ class Likes(db.Model):
     def check(cls, user, postid):
         #Check if specific user is tagged with this post_id
         rows = 0
-        q = db.GqlQuery("Select * FROM Likes WHERE post_id='"+postid+"' AND user='"+user+"'")
+        q = db.GqlQuery("Select * FROM Likes WHERE "
+                        "post_id='"+postid+"' AND user='"+user+"'")
         #get results and check amount of rows
         for r in q:
             rows += 1
@@ -187,6 +189,7 @@ class Likes(db.Model):
             return True
         else:
             return False
+    
     
 # Blog_Post DB   
 class Blog_Post(db.Model):
@@ -213,6 +216,7 @@ class Blog_Post(db.Model):
     def by_id(cls, uid):
         return Blog_Post.get_by_id(uid)
     
+    @classmethod
     def addlike(cls, user, postid):
         #Check Likes database if user is tagged with post_id
         if Likes.check(user, postid):
@@ -221,6 +225,7 @@ class Blog_Post(db.Model):
             p.put()
             nl = Likes(user = user, post_id = postid)
             nl.put()
+        
         
 #User DB Class       
 class User(db.Model):
@@ -262,6 +267,7 @@ class Welcome(BaseHandler):
         else:
             self.redirect('/login')
             
+            
 #Class used for POST->REDIRECT           
 class ErrPage(BaseHandler):
     def get(self):
@@ -277,10 +283,12 @@ class ErrPage(BaseHandler):
             self.render("err_page.html", msg=msg,
                         loggedin=loggedin, username=u)
         
+        
 #Handler for /blog page   
 class Blog(BaseHandler):
     def get(self):
-        posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
+        posts = db.GqlQuery("Select * FROM Blog_Post ORDER " 
+                            "BY created DESC LIMIT 10")
         loggedin = False
         if self.user:
             loggedin = True
@@ -292,7 +300,8 @@ class Blog(BaseHandler):
                         page_title="FMQ Blog")
         
     def post(self):
-        posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
+        posts = db.GqlQuery("Select * FROM Blog_Post ORDER "
+                            "BY created DESC LIMIT 10")
         loggedin = False
         if self.user:
             loggedin = True
@@ -303,35 +312,46 @@ class Blog(BaseHandler):
                 # if author of post is not current user then addlike
                 if bp.author is not self.user.name:
                     Blog_Post.addlike(self.user.name, postid)
-                    posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
+                    posts = db.GqlQuery("Select * FROM Blog_Post "
+                                        "ORDER BY created DESC LIMIT 10")
                     time.sleep(0.1)
                     self.redirect('/blog')
-    #               self.render("blog.html", posts = posts, page_title = "FMQ Blog", loggedin = loggedin)
-                else: 
-                    posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
+                else:
+                    posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY "
+                                        "created DESC LIMIT 10")
                     self.render("blog.html", posts = posts,
                                 page_title = "FMQ Blog",
                                 loggedin = loggedin)
             else:
-                posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY created DESC LIMIT 10")
+                posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY "
+                                    "created DESC LIMIT 10")
                 self.render("blog.html", posts = posts,
                             page_title = "FMQ Blog",
                             loggedin = loggedin)
         else:
-            self.redirect('/blog')
+            self.redirect('/login')
+            
             
 # /blog/del handler           
 class DeletePost(BaseHandler):
     def get(self):
-        self.redirect("/blog")
+        self.redirect('/login')
         
     def post(self):
-        # if delete form is submitted with POST
-        id_to_del = self.request.get("delete")
-        q = db.GqlQuery("Select * FROM Blog_Post WHERE id="+id_to_del+" LIMIT 1")
-        db.delete(q)
-        msg = "You have deleted the post."
-        self.render("delete_post.html", msg=msg)
+        if self.user:
+            # if delete form is submitted with POST
+            id_to_del = self.request.get("delete")
+            q = db.GqlQuery("Select * FROM Blog_Post WHERE "
+                            "id="+id_to_del+" LIMIT 1")
+            if self.user.name is q.author:
+                db.delete(q)
+                msg = "You have deleted the post."
+                self.render("delete_post.html", msg=msg)
+            else:
+                redirect('/login')
+        else:
+            redirect('/login')
+        
         
 # Permalink.html Handler /blog/[0-9]        
 class PostPage(BaseHandler):
@@ -358,7 +378,7 @@ class PostPage(BaseHandler):
                                 page_title="Edit Post")
             else:
                 msg = "You must be the author to edit."
-                self.redirect('/err?msg=%s' % str(msg)) 
+                self.redirect('/err?msg=%s' % str(msg))
         else: 
             self.redirect('/login')
                 
@@ -376,11 +396,14 @@ class PostPage(BaseHandler):
                 else:
                     msg = "You must be the author to edit."
                     self.redirect('/err?msg=%s' % str(msg))
-                              
+        else:
+            self.redirect('/login')
+                           
+                
 # /blog/editpost Handler
 class EditPost(BaseHandler):
     def get(self):
-        self.redirect('/blog')
+        self.redirect('/login')
     
     def post(self):
         if self.user:
@@ -405,8 +428,9 @@ class EditPost(BaseHandler):
                             error=error, loggedin=loggedin,
                             username=self.user.name)
                 
+                
 #/blog/newpost handler
-class NewPost(BaseHandler): 
+class NewPost(BaseHandler):
     def get(self):
         if self.user:
             loggedin = True
