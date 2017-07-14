@@ -188,7 +188,7 @@ class Likes(db.Model):
         else:
             return False
     
-Blog_Post DB   
+# Blog_Post DB   
 class Blog_Post(db.Model):
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
@@ -320,7 +320,7 @@ class Blog(BaseHandler):
         else:
             self.redirect('/blog')
             
-            
+# /blog/del handler           
 class DeletePost(BaseHandler):
     def get(self):
         self.redirect("/blog")
