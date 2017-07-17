@@ -189,7 +189,14 @@ class Likes(db.Model):
             return True
         else:
             return False
-    
+
+# Blog Comments DB        
+class Comment(db.Model):
+    author = db.StringProperty(required = True)
+    post_id = db.StringProperty(required = True)
+    content = db.TextProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+    likes = db.IntegerProperty()
     
 # Blog_Post DB   
 class Blog_Post(db.Model):
