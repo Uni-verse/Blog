@@ -19,9 +19,16 @@
         <br>
         <div style="float: right;">
             <a id="edit" href="/blog/{{p.key().id()}}">EDIT</a>{{error}}
-            <form method='post' action='/blog'><input id='postid' type='hidden' name='postid' value='{{p.key().id()}}'><input type='hidden' name='author' value='{{p.author}}'><input type='hidden' name='addlike' value='{{p.key().id()}}'>
-            <input class="likes" style="position:relative;background:none;border:none;padding:0;" type="submit" value="LIKES">
-            <span style="position:relative;color:blue;" id="likes"> - {{ p.likes }}</span>
+            <form method='post' action='/blog/comment'>
+                <input type='hidden' name='nc' value='{{p.key().id()}}'>
+                <input type='submit' value='COMMENT'>
+            </form>
+            <form method='post' action='/blog'>
+                <input id='postid' type='hidden' name='postid' value='{{p.key().id()}}'>
+                <input type='hidden' name='author' value='{{p.author}}'>
+                <input type='hidden' name='addlike' value='{{p.key().id()}}'>
+                <input class="likes" style="position:relative;background:none;border:none;padding:0;" type="submit" value="LIKES">
+                <span style="position:relative;color:blue;" id="likes"> - {{ p.likes }}</span>
             </form>
         </div>
     </div>

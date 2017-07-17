@@ -190,6 +190,7 @@ class Likes(db.Model):
         else:
             return False
 
+        
 # Blog Comments DB        
 class Comment(db.Model):
     author = db.StringProperty(required = True)
@@ -197,6 +198,7 @@ class Comment(db.Model):
     content = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
     likes = db.IntegerProperty()
+    
     
 # Blog_Post DB   
 class Blog_Post(db.Model):
@@ -287,8 +289,8 @@ class ErrPage(BaseHandler):
             self.redirect('/blog')
         elif self.request.get('msg'):
             msg = self.request.get("msg")
-            self.render("err_page.html", msg=msg,
-                        loggedin=loggedin, username=u)
+            self.render("err_page.html", msg = msg,
+                        loggedin = loggedin, username = u)
         
         
 #Handler for /blog page   
@@ -299,9 +301,9 @@ class Blog(BaseHandler):
         loggedin = False
         if self.user:
             loggedin = True
-            self.render("blog.html", posts=posts,
-                        page_title="FMQ Blog",
-                        loggedin=loggedin)
+            self.render("blog.html", posts = posts,
+                        page_title = "FMQ Blog",
+                        loggedin = loggedin)
         else:
             self.render("blog.html", posts=posts,
                         page_title="FMQ Blog")
@@ -353,7 +355,7 @@ class DeletePost(BaseHandler):
             if self.user.name is q.author:
                 db.delete(q)
                 msg = "You have deleted the post."
-                self.render("delete_post.html", msg=msg)
+                self.render("delete_post.html", msg = msg)
             else:
                 redirect('/login')
         else:
@@ -376,13 +378,13 @@ class PostPage(BaseHandler):
                 elif not p:
                     error = "You must be owner of the this post to edit."
                     p = ""
-                    self.render("permalink.html", post=post,
-                                error=error, loggedin=loggedin,
-                                page_title="Edit Post")
+                    self.render("permalink.html", post = post,
+                                error = error, loggedin = loggedin,
+                                page_title = "Edit Post")
                 else:
-                    self.render("permalink.html", post=post,
-                                username=p, loggedin=loggedin,
-                                page_title="Edit Post")
+                    self.render("permalink.html", post = post,
+                                username = p, loggedin = loggedin,
+                                page_title = "Edit Post")
             else:
                 msg = "You must be the author to edit."
                 self.redirect('/err?msg=%s' % str(msg))
@@ -405,8 +407,25 @@ class PostPage(BaseHandler):
                     self.redirect('/err?msg=%s' % str(msg))
         else:
             self.redirect('/login')
-                           
-                
+
+            
+# /blog/comment/([0-9]+)
+class NewComment(BaseHandler):
+    def get(self):
+        self.redirect('/blog')
+    
+    def post(self):
+        if self.user:
+            loggedin = True
+            postid = self.request.get("nc")
+            post = Blog_Post.get_by_id(int(postid))
+            self.render("new_comment.html",
+                        page_title = "New Comment",
+                        p = post,
+                        loggedin = loggedin,
+                        username = self.user.name)
+
+            
 # /blog/editpost Handler
 class EditPost(BaseHandler):
     def get(self):
@@ -478,6 +497,7 @@ app = webapp2.WSGIApplication([('/signup', Register),
                                ('/welcome', Welcome),
                                ('/blog/?', Blog),
                                ('/blog/editpost', EditPost),
+                               ('/blog/comment', NewComment),
                                ('/blog/del', DeletePost),
                                ('/err', ErrPage),
                                ('/blog/newpost', NewPost),
