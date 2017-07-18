@@ -263,11 +263,13 @@ class Blog_Post(db.Model):
         #Check Likes database if user is tagged with post_id
         if Likes.check(user, postid):
             p = Blog_Post.get_by_id(int(postid))
-            p.likes += 1
-            p.put()
-            nl = Likes(user = user, post_id = postid)
-            nl.put()
-        
+            if user != p.author:
+                p.likes += 1
+                p.put()
+                nl = Likes(user = user, post_id = postid)
+                nl.put()
+            else:
+                return
         
 #User DB Class       
 class User(db.Model):
@@ -354,9 +356,9 @@ class Blog(BaseHandler):
             if self.request.get('addlike'):
                 postid = self.request.get("addlike")
                 bp = Blog_Post.get_by_id(int(postid))
-                if bp is not None:
+                if bp != None:
                     # if author of post is not current user then addlike
-                    if bp.author is not self.user.name:
+                    if bp.author != self.user.name:
                         Blog_Post.addlike(self.user.name, postid)
                         time.sleep(0.1)
                         self.redirect('/err?liked=%s' % str(postid))
