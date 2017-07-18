@@ -183,6 +183,10 @@ class Likes(db.Model):
         q = db.GqlQuery("Select * FROM Likes WHERE "
                         "post_id='"+postid+"' AND user='"+user+"'")
         #get results and check amount of rows
+#        if len(q) is 0:
+#            return True
+#        else: 
+#            return False
         for r in q:
             rows += 1
         if rows == 0:
@@ -237,8 +241,8 @@ class Blog_Post(db.Model):
     
     def render(self):
         c = db.GqlQuery("Select * FROM Comment "
-                               "WHERE post_id='"+str(self.key().id())+
-                               "' ORDER BY created DESC")
+                        "WHERE post_id='"+str(self.key().id())+
+                        "' ORDER BY created DESC")
         if c is not None:
             self.comments = c
         
@@ -350,19 +354,24 @@ class Blog(BaseHandler):
             if self.request.get('addlike'):
                 postid = self.request.get("addlike")
                 bp = Blog_Post.get_by_id(int(postid))
-                # if author of post is not current user then addlike
-                if bp.author is not self.user.name:
-                    Blog_Post.addlike(self.user.name, postid)
-                    posts = db.GqlQuery("Select * FROM Blog_Post "
-                                        "ORDER BY created DESC LIMIT 10")
-                    time.sleep(0.1)
-                    self.redirect('/blog')
+                if bp is not None:
+                    # if author of post is not current user then addlike
+                    if bp.author is not self.user.name:
+                        Blog_Post.addlike(self.user.name, postid)
+                        time.sleep(0.1)
+                        self.redirect('/err?liked=%s' % str(postid))
+                    else:
+                        posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY "
+                                            "created DESC LIMIT 10")
+                        self.render("blog.html", posts = posts,
+                                    page_title = "FMQ Blog",
+                                    loggedin = loggedin)
+                        
                 else:
-                    posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY "
-                                        "created DESC LIMIT 10")
                     self.render("blog.html", posts = posts,
-                                page_title = "FMQ Blog",
-                                loggedin = loggedin)
+                                    page_title = "FMQ Blog",
+                                    loggedin = loggedin)
+                    
             else:
                 posts = db.GqlQuery("Select * FROM Blog_Post ORDER BY "
                                     "created DESC LIMIT 10")
@@ -372,28 +381,7 @@ class Blog(BaseHandler):
         else:
             self.redirect('/login')
             
-            
-# /blog/del handler           
-class DeletePost(BaseHandler):
-    def get(self):
-        self.redirect('/login')
-        
-    def post(self):
-        if self.user:
-            # if delete form is submitted with POST
-            id_to_del = self.request.get("delete")
-            q = db.GqlQuery("Select * FROM Blog_Post WHERE "
-                            "id="+id_to_del+" LIMIT 1")
-            if self.user.name is q.author:
-                db.delete(q)
-                msg = "You have deleted the post."
-                self.render("delete_post.html", msg = msg)
-            else:
-                redirect('/login')
-        else:
-            redirect('/login')
-        
-        
+    
 # Permalink.html Handler /blog/[0-9]        
 class PostPage(BaseHandler):
     def get(self, post_id):
@@ -430,13 +418,14 @@ class PostPage(BaseHandler):
             if self.request.get('erase'):
                 idTodel = self.request.get('erase')
                 p = Blog_Post.get_by_id(int(idTodel))
-                if p.author == self.user.name:
-                    p.delete()
-                    msg = "Post successfully deleted."
-                    self.redirect('/err?msg=%s' % str(msg))
-                else:
-                    msg = "You must be the author to edit."
-                    self.redirect('/err?msg=%s' % str(msg))
+                if p is not None:
+                    if p.author == self.user.name:
+                        p.delete()
+                        msg = "Post successfully deleted."
+                        self.redirect('/err?msg=%s' % str(msg))
+                    else:
+                        msg = "You must be the author to edit."
+                        self.redirect('/err?msg=%s' % str(msg))
         else:
             self.redirect('/login')
 
@@ -498,13 +487,16 @@ class EditPost(BaseHandler):
             content = self.request.get("content")
             author = self.request.get("author")
 
-            if subject and content:
+            if subject and content and loggedin:
                 p = Blog_Post.get_by_id(int(idToedit))
                 p.subject = subject
                 p.content = content
-                p.put()
-                msg = "Your post has been edited."
-                self.redirect('/err?msg=%s' % msg)
+                if self.user.name == p.author:
+                    p.put()
+                    msg = "Your post has been edited."
+                    self.redirect('/err?msg=%s' % msg)
+                else:
+                    redirect('/blog')
             else:
                 error = "Please fill both fields."
                 self.render("permalink.html", subject=subject,
@@ -529,24 +521,25 @@ class NewPost(BaseHandler):
     def post(self):
         if self.user:
             loggedin = True
-            
-        subject = self.request.get("subject")
-        content = self.request.get("content")
-        author = self.request.get("author")
-        # if both fields are populated, continue
-        if subject and content:
-            bp = Blog_Post(subject = subject, content = content,
-                           author = author, likes = 0)
-            bp.put()
-            time.sleep(0.1)
-            self.redirect('/blog')
-            self.redirect('/err?np=%s' % str(bp.key().id()))
+            subject = self.request.get("subject")
+            content = self.request.get("content")
+            author = self.request.get("author")
+            # if both fields are populated, continue
+            if subject and content:
+                bp = Blog_Post(subject = subject, content = content,
+                               author = author, likes = 0)
+                bp.put()
+                time.sleep(0.1)
+                self.redirect('/blog')
+                self.redirect('/err?np=%s' % str(bp.key().id()))
+            else:
+                error = "Please fill both fields."
+                self.render("new_post.html", subject=subject,
+                            content=content, page_title="New Post",
+                            error=error, loggedin=loggedin,
+                            username=self.user.name)
         else:
-            error = "Please fill both fields."
-            self.render("new_post.html", subject=subject,
-                        content=content, page_title="New Post",
-                        error=error, loggedin=loggedin,
-                        username=self.user.name)
+            redirect('/blog')
         
             
 app = webapp2.WSGIApplication([('/signup', Register),
@@ -556,7 +549,6 @@ app = webapp2.WSGIApplication([('/signup', Register),
                                ('/blog/?', Blog),
                                ('/blog/editpost', EditPost),
                                ('/blog/comment/([0-9]+)', NewComment),
-                               ('/blog/del', DeletePost),
                                ('/err', ErrPage),
                                ('/blog/newpost', NewPost),
                                ('/blog/([0-9]+)', PostPage)

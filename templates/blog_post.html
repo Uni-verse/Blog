@@ -30,12 +30,10 @@
     <br>
     <br>
 </div>
-{% if p.comments is not None %}
-    {% for x in p.comments %}
-        <br>
-        {{ p.render_comments(x) | safe }}
-        <br>
-    {% endfor %}
-{% endif %}
-    
+{% for x in p.comments %}
+    <br>
+    {{ p.render_comments(x) | safe }}
+    <br>
+{% endfor %}
+
     
