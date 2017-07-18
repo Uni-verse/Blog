@@ -241,6 +241,8 @@ class Blog_Post(db.Model):
                                "' ORDER BY created DESC")
         if c:
             self.comments = c
+        else: 
+            self.comments = NULL
         
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("blog_post.html", p=self)
@@ -324,6 +326,8 @@ class ErrPage(BaseHandler):
 #Handler for /blog page   
 class Blog(BaseHandler):
     def get(self):
+        q = Comment(author = "sergio", post_id="325252345", content="init comment", likes = 0)
+        q.put()
         posts = db.GqlQuery("Select * FROM Blog_Post ORDER " 
                             "BY created DESC LIMIT 10")
         
