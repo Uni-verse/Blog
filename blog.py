@@ -236,9 +236,11 @@ class Blog_Post(db.Model):
         return render_str("comment_post.html", c=c)
     
     def render(self):
-        self.comments = db.GqlQuery("Select * FROM Comment "
+        c = db.GqlQuery("Select * FROM Comment "
                                "WHERE post_id='"+str(self.key().id())+
                                "' ORDER BY created DESC")
+        if c:
+            self.comments = c
         
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("blog_post.html", p=self)
