@@ -326,18 +326,14 @@ class Blog(BaseHandler):
     def get(self):
         posts = db.GqlQuery("Select * FROM Blog_Post ORDER " 
                             "BY created DESC LIMIT 10")
-        comments = db.GqlQuery("Select * FROM Comment ORDER "
-                               "BY created DESC")
         
         if self.user:
             loggedin = True
             self.render("blog.html", posts = posts,
                         page_title = "FMQ Blog",
-                        loggedin = loggedin,
-                        comments = comments)
+                        loggedin = loggedin)
         else:
             self.render("blog.html", posts = posts,
-                        comments = comments,
                         page_title = "FMQ Blog")
         
     def post(self):
