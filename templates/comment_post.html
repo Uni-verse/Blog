@@ -1,9 +1,16 @@
-<div class='row'>
-    <br>
-    <span>Comment by: {{c.author}}</span>
-    {{ c.created.strftime("%b %d, %Y") }}
-    <hr>
-    {{ c.content | safe }}
-    {{c.post_id}}
-    <br>
+<div class="row">
+    <div class="col-lg-6 col-lg-offset-4 col-md-6 col-md-offset-4 col-sm-6 col-sm-offset-4 col-xs-10 col-xs-offset-2" style="background: #FFF;border-radius:1em;box-shadow:0.05em 0.05em 2px #999999;padding:1em;">
+        <div class="user-icon" style="float:left;height:2em;width:2em;border-radius:1em;font-size:1em;color:white;" onload="addbg(event);">
+            <p style="position:relative;font-size:1em;top:em;left:0.8em;">
+                {% if c.author %}
+                    {% set x = c.author.lower().split(",") %}
+                    {{ x[0][:1] }}
+                {% endif %}
+            </p>
+        </div>
+        <span class="col-lg-6 col-md-4 col-sm-6 col-xs-12">Comment by: {{c.author}}</span>
+        <span style="float: right;" class="col-lg-3 col-md-4 col-sm-4 col-xs-12">-{{c.created.strftime("%b %d, %Y")}}</span>
+        <hr style="border:1px solid gray;width:90%;float:left;">
+        <p style="padding-left: 3em;padding-right: 3em;float: left;">{{c.content | safe}}</p>  
+    </div>
 </div>

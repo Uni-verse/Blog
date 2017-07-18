@@ -204,6 +204,7 @@ class Comment(db.Model):
         u = User.all().filter('name =', name).get()
         return u
     
+    @classmethod
     def getcomments(cls, post):
         comments = db.GqlQuery("Select * FROM Comment "
                                "WHERE post_id='"+str(post.key().id())+
@@ -231,7 +232,14 @@ class Blog_Post(db.Model):
         u = Blog_Post.all().filter('author =', author).get()
         return u
     
+    def render_comments(self, c):
+        return render_str("comment_post.html", c=c)
+    
     def render(self):
+        self.comments = db.GqlQuery("Select * FROM Comment "
+                               "WHERE post_id='"+str(self.key().id())+
+                               "' ORDER BY created DESC")
+        
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("blog_post.html", p=self)
     
