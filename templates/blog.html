@@ -9,6 +9,14 @@
 <br>
     {% for p in posts %}
         {{ p.render() | safe }}
+        {% for c in comments %}
+<!--        {{c.render() | safe }}-->
+            {% if p.key().id() == c.post_id %}
+<!--                {% set x = c.getcomments(p) %}-->
+                {{c.content}}
+            {% endif %}
+        {% endfor %}
+       
         <br>
         <br>
         <br>

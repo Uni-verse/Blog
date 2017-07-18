@@ -1,0 +1,9 @@
+<div class='row'>
+    <br>
+    <span>Comment by: {{c.author}}</span>
+    {{ c.created.strftime("%b %d, %Y") }}
+    <hr>
+    {{ c.content | safe }}
+    {{c.post_id}}
+    <br>
+</div>

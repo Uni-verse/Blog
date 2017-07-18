@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 
-
 {% block content %}
     {{ p.render() | safe }}
     <br>
@@ -10,7 +9,7 @@
         <div class="well" style="width: 50%;margin: 0 auto;">
             <h1>New Comment</h1>
             <br>
-                <form method="post" action="/blog/comment">
+                <form method="post" action="/blog/comment/{{postid}}">
                     <br>
                     <div><label>Body</label>
                     <br>
@@ -20,9 +19,9 @@
                     <input type="submit" class="btn btn-primary">
                     <span style="color: red;">{{error}}</span>
                     <input type="hidden" name="author" value="{{username}}">
-                    <input type="hidden" name="postid" value="{{p.key().id()}}">
+                    <input type="hidden" name="postid" value="{{postid}}">
                 </form>
-                <br>
+            <br>
         </div>
     </div>
 {% endblock %}

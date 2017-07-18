@@ -1,12 +1,14 @@
 <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-12">
-        <div class="user-icon" style="float:left;height:3em;width:3em;border-radius:1.5em;font-size:1em;color:white;" onload="addbg(event);"><p style="position:relative;font-size:3em;top:-0.25em;left:0.25em;">
+        <div class="user-icon" style="float:left;height:3em;width:3em;border-radius:1.5em;font-size:1em;color:white;" onload="addbg(event);">
+            <p style="position:relative;font-size:3em;top:-0.25em;left:0.25em;">
             {% if p.author %}
             {% set x = p.author.lower().split(",") %}
             {{ x[0][:1] }}
             {% endif %}
-            </p></div>
-        <h4 class="col-lg-6 col-md-4 col-sm-6 col-xs-12">{{p.subject}}</h4>
+            </p>
+        </div>
+        <h4 class="col-lg-6 col-md-4 col-sm-6 col-xs-12">{{p.subject}}</h4>{{p.key().id()}}
         <span style="float: right;" class="col-lg-2 col-md-4 col-sm-4 col-xs-12">-{{p.created.strftime("%b %d, %Y")}}</span>
             <input id="author" type="hidden" data-author="{{p.author}}">
             <input id="id" type="hidden" data-id="{{p.key().id()}}">
@@ -19,10 +21,7 @@
         <br>
         <div style="float: right;">
             <a id="edit" href="/blog/{{p.key().id()}}">EDIT</a>{{error}}
-            <form method='post' action='/blog/comment'>
-                <input type='hidden' name='nc' value='{{p.key().id()}}'>
-                <input type='submit' value='COMMENT'>
-            </form>
+            <a href="/blog/comment/{{p.key().id()}}">COMMENT</a>
             <form method='post' action='/blog'>
                 <input id='postid' type='hidden' name='postid' value='{{p.key().id()}}'>
                 <input type='hidden' name='author' value='{{p.author}}'>
@@ -32,4 +31,4 @@
             </form>
         </div>
     </div>
-</div>  
+</div>

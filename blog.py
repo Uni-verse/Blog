@@ -199,6 +199,24 @@ class Comment(db.Model):
     created = db.DateTimeProperty(auto_now_add = True)
     likes = db.IntegerProperty()
     
+    @classmethod
+    def by_name(cls, name):
+        u = User.all().filter('name =', name).get()
+        return u
+    
+    def getcomments(cls, post):
+        comments = db.GqlQuery("Select * FROM Comment "
+                               "WHERE post_id='"+str(post.key().id())+
+                               "' ORDER BY created DESC")
+        return comments
+        
+    def render(self):
+#        comments = db.GqlQuery("Select * FROM Comment "
+#                               "WHERE post_id='"+str(pid.key().id())+
+#                               "' ORDER BY created DESC")
+        self._render_text = self.content.replace('\n', '<br>')
+        return render_str("comment_post.html", c=self)
+    
     
 # Blog_Post DB   
 class Blog_Post(db.Model):
@@ -298,15 +316,19 @@ class Blog(BaseHandler):
     def get(self):
         posts = db.GqlQuery("Select * FROM Blog_Post ORDER " 
                             "BY created DESC LIMIT 10")
-        loggedin = False
+        comments = db.GqlQuery("Select * FROM Comment ORDER "
+                               "BY created DESC")
+        
         if self.user:
             loggedin = True
             self.render("blog.html", posts = posts,
                         page_title = "FMQ Blog",
-                        loggedin = loggedin)
+                        loggedin = loggedin,
+                        comments = comments)
         else:
-            self.render("blog.html", posts=posts,
-                        page_title="FMQ Blog")
+            self.render("blog.html", posts = posts,
+                        comments = comments,
+                        page_title = "FMQ Blog")
         
     def post(self):
         posts = db.GqlQuery("Select * FROM Blog_Post ORDER "
@@ -411,19 +433,45 @@ class PostPage(BaseHandler):
             
 # /blog/comment/([0-9]+)
 class NewComment(BaseHandler):
-    def get(self):
-        self.redirect('/blog')
-    
-    def post(self):
+    def get(self, postid):
         if self.user:
             loggedin = True
-            postid = self.request.get("nc")
             post = Blog_Post.get_by_id(int(postid))
+            postid = int(postid)
             self.render("new_comment.html",
                         page_title = "New Comment",
-                        p = post,
                         loggedin = loggedin,
+                        postid = postid,
+                        p = post,
                         username = self.user.name)
+        else:
+            self.redirect('/login')
+    
+    def post(self, postid):
+        if self.user:
+            loggedin = True
+            postid = self.request.get('postid')
+            author = self.request.get('author')
+            content = self.request.get('content')
+            
+            if postid and author and content:
+                ac = Comment(post_id = postid, author = author,
+                             content = content, likes = 0)
+                ac.put()
+                time.sleep(0.1)
+                self.redirect('/blog')
+            else:
+                error = "Please make sure field is populated"
+                self.render("new_comment.html",
+                        page_title = "New Comment",
+                        loggedin = loggedin,
+                        postid = postid,
+                        p = post,
+                        error = error,
+                        username = self.user.name)
+                
+        else: 
+            self.redirect('/login')
 
             
 # /blog/editpost Handler
@@ -497,7 +545,7 @@ app = webapp2.WSGIApplication([('/signup', Register),
                                ('/welcome', Welcome),
                                ('/blog/?', Blog),
                                ('/blog/editpost', EditPost),
-                               ('/blog/comment', NewComment),
+                               ('/blog/comment/([0-9]+)', NewComment),
                                ('/blog/del', DeletePost),
                                ('/err', ErrPage),
                                ('/blog/newpost', NewPost),
