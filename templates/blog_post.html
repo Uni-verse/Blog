@@ -30,7 +30,7 @@
     <br>
     <br>
 </div>
-{% if p.comments %}
+{% if p.comments is not None %}
     {% for x in p.comments %}
         <br>
         {{ p.render_comments(x) | safe }}

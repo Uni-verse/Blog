@@ -239,10 +239,8 @@ class Blog_Post(db.Model):
         c = db.GqlQuery("Select * FROM Comment "
                                "WHERE post_id='"+str(self.key().id())+
                                "' ORDER BY created DESC")
-        if c:
+        if c is not None:
             self.comments = c
-        else: 
-            self.comments = NULL
         
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("blog_post.html", p=self)
@@ -252,6 +250,7 @@ class Blog_Post(db.Model):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("edit_post.html", p=self)
     
+    @classmethod
     def by_id(cls, uid):
         return Blog_Post.get_by_id(uid)
     
@@ -326,9 +325,10 @@ class ErrPage(BaseHandler):
 #Handler for /blog page   
 class Blog(BaseHandler):
     def get(self):
-        q = Comment(author = "sergio", post_id="325252345", content="init comment", likes = 0)
+        q = Comment(author = "sergio", post_id="32523453452345",
+                    content="init comment", likes = 0)
         q.put()
-        posts = db.GqlQuery("Select * FROM Blog_Post ORDER " 
+        posts = db.GqlQuery("Select * FROM Blog_Post ORDER "
                             "BY created DESC LIMIT 10")
         
         if self.user:
