@@ -11,6 +11,17 @@
         <span class="col-lg-6 col-md-4 col-sm-6 col-xs-12">Comment by: {{c.author}}</span>
         <span style="float: right;" class="col-lg-3 col-md-4 col-sm-4 col-xs-12">-{{c.created.strftime("%b %d, %Y")}}</span>
         <hr style="border:1px solid gray;width:90%;float:left;">
-        <p style="padding-left: 3em;padding-right: 3em;float: left;">{{c.content | safe}}</p>  
+        <p style="padding-left: 3em;padding-right: 3em;float: left;">{{c.content | safe}}</p>
+        <div style="float: right;">
+        <a id="edit" href="/blog/{{c.key().id()}}">EDIT</a>{{error}}
+        <a href="/blog/comment/{{c.key().id()}}">COMMENT</a>
+        <form method='post' action='/blog'>
+            <input id='postid' type='hidden' name='postid' value='{{c.key().id()}}'>
+            <input type='hidden' name='author' value='{{c.author}}'>
+            <input type='hidden' name='addlike' value='{{c.key().id()}}'>
+            <input class="likes" style="position:relative;background:none;border:none;padding:0;" type="submit" value="LIKES">
+            <span style="position:relative;color:blue;" id="likes"> - {{ c.likes }}</span>
+        </form>
+        </div>
     </div>
 </div>
