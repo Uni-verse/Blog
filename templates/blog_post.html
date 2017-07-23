@@ -26,14 +26,17 @@
                 <span style="position:relative;color:blue;" id="likes"> - {{ p.likes }}</span>
             </form>
         </div>
+        <br>
+        <br>
+        {% for x in p.comments %}
+            <br>
+            {{ p.render_comments(x) | safe }}
+            <br>
+        {% endfor %}
     </div>
     <br>
     <br>
 </div>
-{% for x in p.comments %}
-    <br>
-    {{ p.render_comments(x) | safe }}
-    <br>
-{% endfor %}
+
 
     
