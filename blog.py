@@ -430,8 +430,25 @@ class PostPage(BaseHandler):
                         self.redirect('/err?msg=%s' % str(msg))
         else:
             self.redirect('/login')
-
             
+            
+# /blog/editcomment handler
+class EditComment(BaseHandler):
+    def get(self):
+        self.redirect('/login')
+    
+    def post(self):
+        pass
+        
+# /blog/likecomment handler
+class LikeComment(BaseHandler):
+    def get(self):
+        self.redirect('/login')
+    
+    def post(self):
+        pass
+    
+    
 # /blog/comment/([0-9]+)
 class NewComment(BaseHandler):
     def get(self, postid):
@@ -550,7 +567,9 @@ app = webapp2.WSGIApplication([('/signup', Register),
                                ('/welcome', Welcome),
                                ('/blog/?', Blog),
                                ('/blog/editpost', EditPost),
+                               ('/blog/editcomment', EditComment),
                                ('/blog/comment/([0-9]+)', NewComment),
+                               ('/blog/likecomment', LikeComment)
                                ('/err', ErrPage),
                                ('/blog/newpost', NewPost),
                                ('/blog/([0-9]+)', PostPage)

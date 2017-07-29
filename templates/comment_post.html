@@ -13,9 +13,8 @@
         <hr style="border:1px solid gray;width:90%;float:left;">
         <p style="padding-left: 3em;padding-right: 3em;float: left;">{{c.content | safe}}</p>
         <div style="float: right;">
-        <a id="edit" href="/blog/{{c.key().id()}}">EDIT</a>{{error}}
-        <a href="/blog/comment/{{c.key().id()}}">COMMENT</a>
-        <form method='post' action='/blog'>
+        <a id="edit" href="/blog/editcomment/{{c.key().id()}}">EDIT</a>{{error}}
+        <form method='post' action='/blog/likecomment'>
             <input id='postid' type='hidden' name='postid' value='{{c.key().id()}}'>
             <input type='hidden' name='author' value='{{c.author}}'>
             <input type='hidden' name='addlike' value='{{c.key().id()}}'>
