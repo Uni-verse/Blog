@@ -331,12 +331,11 @@ class ErrPage(BaseHandler):
 #Handler for /blog page   
 class Blog(BaseHandler):
     def get(self):
-        q = Comment(author = "sergio", post_id="32523453452345",
-                    content="init comment", likes = 0)
-        q.put()
+#        q = Comment(author = "sergio", post_id="32523453452345",
+#                    content="init comment", likes = 0)
+#        q.put()
         posts = db.GqlQuery("Select * FROM Blog_Post ORDER "
                             "BY created DESC LIMIT 10")
-        
         if self.user:
             loggedin = True
             self.render("blog.html", posts = posts,
@@ -434,11 +433,26 @@ class PostPage(BaseHandler):
             
 # /blog/editcomment handler
 class EditComment(BaseHandler):
-    def get(self):
-        self.redirect('/login')
+    def get(self, postid):
+        if self.user:
+            loggedin = True
+            post = Comment.get_by_id(int(postid))
+            postid = int(postid)
+            if self.user.name == post.author:
+                self.render("edit_comment.html",
+                           page_title = "Edit Comment",
+                           loggedin = loggedin,
+                           p = post,
+                           username = self.user.name)
+            else:
+                msg = "You must be the author to edit."
+                self.redirect('/err?msg=%s' % str(msg))
+        else:
+            self.redirect('/login')
     
     def post(self):
         pass
+        
         
 # /blog/likecomment handler
 class LikeComment(BaseHandler):
@@ -567,9 +581,9 @@ app = webapp2.WSGIApplication([('/signup', Register),
                                ('/welcome', Welcome),
                                ('/blog/?', Blog),
                                ('/blog/editpost', EditPost),
-                               ('/blog/editcomment', EditComment),
+                                ('/blog/editcomment/([0-9]+)', EditComment),
                                ('/blog/comment/([0-9]+)', NewComment),
-                               ('/blog/likecomment', LikeComment)
+                               ('/blog/likecomment', LikeComment),
                                ('/err', ErrPage),
                                ('/blog/newpost', NewPost),
                                ('/blog/([0-9]+)', PostPage)
