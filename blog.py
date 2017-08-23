@@ -450,10 +450,30 @@ class EditComment(BaseHandler):
         else:
             self.redirect('/login')
     
-    def post(self):
-        pass
-        
-        
+    def post(self, postid):
+        if self.user:
+            if self.request.get('edit'):
+                cid = self.request.get('edit')
+                post = Comment.get_by_id(int(cid))
+                if self.request.get('content') == "":
+                    self.render("edit_comment.html",
+                           page_title = "Edit Comment",
+                           p = post,
+                           username = self.user.name)
+                
+                else:
+                    body = self.request.get('content')
+                    post.content = body
+                    if self.user.name == post.author:
+                        post.put()
+                        msg = "Your post has been edited."
+                        self.redirect('/err?msg=%s' % msg)
+                    else:
+                        redirect('/blog')
+
+        else:
+            self.redirect('/login')
+                
 # /blog/likecomment handler
 class LikeComment(BaseHandler):
     def get(self):

@@ -1,8 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
 <div class="row">
     <div style="min-width: 300px;"class="well col-md-6 col-md-offset-3 col-sm-4 col-sm-offset-4 col-xs-6 col-xs-offset-3">
-        <h2>Edit Post</h2>
+        <h2>Edit Comment</h2>
                 <br>
-                    <form method="post" action="/blog/editpost/{{p.key().id()}}">
+                    <form method="post" action="/blog/editcomment/{{p.key().id()}}">
                         <br>
                         <br>
                         <div><label>Body</label>
@@ -19,3 +21,4 @@
                 <br>
     </div>
 </div>
+{% endblock %}
